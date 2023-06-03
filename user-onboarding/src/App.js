@@ -92,11 +92,15 @@ function App() {
     postUsers(newUser)
   }
 
+  ////////////////////////// SIDE EFFECTS //////////////////////////
+  useEffect(() => {
+    schema.isValid(formValues).then(valid => setDisabled(!valid))
+  }, [formValues])  
+
   return (
     <div className="App">
       <Form 
         values={formValues}
-        users={users}
         update={onChange}
         submit={onSubmit}
         errors={formErrors}
