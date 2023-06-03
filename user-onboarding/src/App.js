@@ -67,7 +67,7 @@ function App() {
         .finally(() => setFormValues(initialFormValues))
   }
    
-  ////////////////////////// FORM VALIDATION //////////////////////////
+  ////////////////////////// EVENT HANDLERS //////////////////////////
   const validate = (name, value) => {
     yup.reach(schema, name)
       .validate(value)
@@ -75,11 +75,32 @@ function App() {
       .catch((err) => setFormErrors({ ...formErrors, [name]: err.errors[0] }))
   }
 
+  const onChange = (name, value) => {
+    validate(name, value)
+    setFormValues({ ...formValues, [name]: value })
+  }
+
+  const onSubmit = () => {
+    const newUser = {
+      fName: formValues.fName.trim(),
+      lName: formValues.lName.trim(),
+      email: formValues.email.trim(),
+      password: formValues.password,
+      terms: formValues.terms
+    }
+
+    postUsers(newUser)
+  }
+
   return (
     <div className="App">
       <Form 
         values={formValues}
         users={users}
+        update={onChange}
+        submit={onSubmit}
+        errors={formErrors}
+        disabled={disabled}
       />
     </div>
   );
