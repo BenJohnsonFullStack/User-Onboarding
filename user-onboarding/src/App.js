@@ -1,10 +1,13 @@
 import './App.css';
 import { useState, useEffect } from 'react';
 import * as yup from 'yup'
+import axios from 'axios';
 import Form from './Form';
 
 
 function App() {
+
+  ////////////////////////// INITIAL VALUES //////////////////////////
   const initialFormValues = {
     fName: "",
     lName: "",
@@ -13,10 +16,24 @@ function App() {
     terms: false
   }
 
-  const [users, setUSers] = useState([])
-  const [formValues, setFormValues] = useState(initialFormValues)
+  const initialFormErrors = {
+    fName: "",
+    lName: "",
+    email: "",
+    password: "",
+    terms: ""
+  }
+  const initialUsers = []
+  const initialDisabled = true
 
-  const schema = yup.object({
+  ////////////////////////// STATE VARIABLES //////////////////////////
+  const [users, setUsers] = useState(initialUsers)
+  const [formValues, setFormValues] = useState(initialFormValues)
+  const [formErrors, setFormErrors] = useState(initialFormErrors)
+  const [disabled, setDisabled] = useState(initialDisabled)
+
+  ////////////////////////// FORM SCHEMA //////////////////////////
+  const schema = yup.object().shape({
     fName: yup
       .string()
       .required("First Name is Required")
@@ -34,12 +51,36 @@ function App() {
       .string()
       .required("Please Enter Your Password"),
     terms: yup
-      .boolean()
+      .boolean(true, "You Must Accept the Terms of Service to Continue")
   })
+
+  ////////////////////////// HELPER FUNCTIONS //////////////////////////
+  const postUsers = () => {
+    axios.post("https://reqres.in/api/users")
+        .then((res) => {
+          console.log(res)
+          setUsers([res.data, ...users])
+        })
+        .catch((err) => {
+          console.error(err)
+        })
+        .finally(() => setFormValues(initialFormValues))
+  }
+   
+  ////////////////////////// FORM VALIDATION //////////////////////////
+  const validate = (name, value) => {
+    yup.reach(schema, name)
+      .validate(value)
+      .then(() => setFormErrors({ ...formErrors, [name]: "" }))
+      .catch((err) => setFormErrors({ ...formErrors, [name]: err.errors[0] }))
+  }
 
   return (
     <div className="App">
-      <Form />
+      <Form 
+        values={formValues}
+        users={users}
+      />
     </div>
   );
 }
